@@ -1,0 +1,69 @@
+h1.ui.header {
+	padding-top: 40px;
+}
+h2.ui.header {
+	padding-bottom: 20px;
+}
+
+.ui .button {
+	background-color: #000000;
+	color: #FFFFFF;
+	margin: 20px;
+}
+
+.results-list {
+	grid-gap: 0 40px;
+}
+
+.results-list.imgur {
+	grid-gap: 0;
+}
+
+.ui.grid.container {
+	margin-bottom: 1.5rem;
+}
+
+.imgur {
+    display: flex;
+    flex-wrap: wrap;
+	justify-content: space-evenly;
+	margin: 0 10px;
+}
+
+.imgur img,
+.imgur video {
+	object-fit: contain;
+	width: 300px;
+}
+
+.imgur h3 {
+	width: 300px;
+}
+
+.imgur div {
+	margin-bottom: 20px;
+}
+
+.results-list h3,
+.results-list p,
+.results-list img,
+.results-list video {
+	width: 250px;
+}
+
+.results-list p {
+	padding-top: 1rem;
+}
+
+.results-list a:hover {
+	text-decoration: underline ;
+}
+
+.result-list .item {
+	margin-bottom: 10px;
+}
+
+.results-list .ui.segment:first-child, .results-list .ui.list:first-child {
+	margin-top: 1rem;
+	padding-top: 1em;
+}
