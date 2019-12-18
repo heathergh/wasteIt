@@ -1,9 +1,11 @@
 const app = {};
 
 app.imgurBaseUrl = "https://api.imgur.com/3/gallery";
+
 app.imgurAccessToken = "3506304d211eee291575dd76d088ddb53f56f638";
 
 app.devTOAccessToken = "4aFRPxQCcxSuTwgim3nQJaku";
+
 app.devTOBaseUrl = "https://dev.to/api";
 
 app.nytObituariesUrl = "https://api.nytimes.com/svc/topstories/v2/obituaries.json?api-key=n8rVAT6WaMe5g4stcG6o9f8iOXimh5ec";
@@ -185,11 +187,13 @@ app.callApi = (selector, classToAdd, classToRemove) => {
             app.resultsList.classList.remove(...classToRemove);
             app.getImgurResults();
         }
+
         if (selector === ".get-learned-fun") {
             app.resultsList.classList.add(...classToAdd);
             app.resultsList.classList.remove(classToRemove); 
             app.getDevToArticles();  
         }
+        
         if (selector === ".no-fun") {
             app.resultsList.classList.add(...classToAdd);
             app.resultsList.classList.remove(classToRemove); 

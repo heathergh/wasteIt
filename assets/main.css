@@ -24,10 +24,12 @@ h2.ui.header {
 }
 
 .imgur {
-    display: flex;
-    flex-wrap: wrap;
+	display: flex;
+	flex-wrap: wrap;
 	justify-content: space-evenly;
-	margin: 0 10px;
+	margin: 0 auto;
+	max-width: 1080px;
+	width: 75%;
 }
 
 .imgur img,
