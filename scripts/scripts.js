@@ -2,7 +2,7 @@ const app = {};
 
 app.imgurBaseUrl = "https://api.imgur.com/3/gallery";
 
-app.imgurAccessToken = "3506304d211eee291575dd76d088ddb53f56f638";
+app.imgurClientID = "3065d378db00228";
 
 app.devTOAccessToken = "4aFRPxQCcxSuTwgim3nQJaku";
 
@@ -14,37 +14,24 @@ app.resultsList = document.querySelector(".results");
 
 
 // Imgur API call
-app.getImgurResults = async () => {
-    try {
-        const imgurRequest = await fetch(`https://api.imgur.com/3/gallery/hot/time/0?&realtimeResults=false&showViral=true&album_previews=true`, {
-            headers: {
-                Authorization: `Bearer ${app.imgurAccessToken}`
-            }
-        });
-        const imgurResponse = await imgurRequest.json();
-        const imgurMediaArray = imgurResponse.data;
-        
-        const imgurTitle = imgurMediaArray.map(item => {
-            return item.title;
-        });
-
-        const imgurResponseArray = imgurMediaArray.map(item => {
-            if (item.hasOwnProperty("images")) {
-                return item;
-            }
-        });
-        
-        const filteredArr = imgurResponseArray.filter(item => {
-            if (item && (item.images[0].type === "video/mp4" || item.images[0].type === "image/jpeg" || item.images[0].type === "image/png")) {
+app.getImgurMedia = async () => {
+    const response = await fetch("https://api.imgur.com/3/gallery/hot/time/0?&realtimeResults=false&showViral=true&album_previews=true", {
+        method: 'GET',
+        headers: {
+            Authorization: `Client-ID ${app.imgurClientID}`
+        }
+    })
+    .then(response => response.json())
+    .then(result => {
+        const filteredResult = result.data.filter(item => {
+            if ((item.hasOwnProperty("images")) && (item.images[0].type === "video/mp4" || item.images[0].type === "image/jpeg" || item.images[0].type === "image/png")) {
                 return true;
             }
         });
 
-        app.showImgurResults(filteredArr);
-
-    } catch (error) {
-        console.error(`uh-oh, something went wrong with the Imgur API call: ${error}`);
-    }
+        app.showImgurResults(filteredResult);
+    })
+    .catch(error => console.error(`uh-oh, something went wrong with the Imgur API call: ${error}`));
 };
 
 // DevTO API call
@@ -74,7 +61,7 @@ app.getNYTObituaries = async () => {
 // Get Imgur response, and append each image and video to the page
 app.showImgurResults = (responseObjs) => {
     responseObjs.forEach(responseObj => {
-        if (responseObj.images[0].animated === false) {
+        if (Array.isArray(responseObj.images) && !responseObj.images.animated) {
             const htmlToAppend = `
                 <div>
                     <h3 class="ui header">
@@ -185,7 +172,7 @@ app.callApi = (selector, classToAdd, classToRemove) => {
         if (selector === ".get-fun") {
             app.resultsList.classList.add(classToAdd);
             app.resultsList.classList.remove(...classToRemove);
-            app.getImgurResults();
+            app.getImgurMedia();
         }
 
         if (selector === ".get-learned-fun") {
