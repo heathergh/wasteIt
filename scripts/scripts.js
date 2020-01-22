@@ -182,7 +182,7 @@ app.callAPIOnClick = (selector, classToAdd, classToRemove) => {
         if (selector === ".get-learned-fun") {
             app.resultsList.classList.add(...classToAdd);
             app.resultsList.classList.remove(classToRemove); 
-            app.getDevToData();  
+            app.getDevToData();
         }
         
         if (selector === ".no-fun") {
