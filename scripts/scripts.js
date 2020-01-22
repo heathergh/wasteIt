@@ -1,6 +1,6 @@
 const app = {};
 
-app.imgurBaseUrl = "https://api.imgur.com/3/gallery";
+app.imgurUrlAndQueryParams = "https://api.imgur.com/3/gallery/hot/time/0?&realtimeResults=false&showViral=true&album_previews=true";
 
 app.imgurClientID = "3065d378db00228";
 
@@ -14,8 +14,8 @@ app.resultsList = document.querySelector(".results");
 
 
 // Imgur API call
-app.getImgurMedia = async () => {
-    const response = await fetch("https://api.imgur.com/3/gallery/hot/time/0?&realtimeResults=false&showViral=true&album_previews=true", {
+app.getImgurData = async (url, options = {}) => {
+    await fetch(app.imgurUrlAndQueryParams, {
         method: 'GET',
         headers: {
             Authorization: `Client-ID ${app.imgurClientID}`
@@ -23,69 +23,76 @@ app.getImgurMedia = async () => {
     })
     .then(response => response.json())
     .then(result => {
-        const filteredResult = result.data.filter(item => {
-            if ((item.hasOwnProperty("images")) && (item.images[0].type === "video/mp4" || item.images[0].type === "image/jpeg" || item.images[0].type === "image/png")) {
-                return true;
-            }
-        });
+        const filteredResult = app.filterImgurData(result.data);
 
-        app.showImgurResults(filteredResult);
+        app.displayImgurData(filteredResult);
     })
     .catch(error => console.error(`uh-oh, something went wrong with the Imgur API call: ${error}`));
 };
 
-// DevTO API call
-app.getDevToArticles = async () => {
-    try {
-        const devToRequest = await fetch(`${app.devTOBaseUrl}/articles`);
-        const devToJsonResponse = await devToRequest.json();
+app.filterImgurData = (result) => {
+    return result.filter(item => {
+        if ((item.hasOwnProperty("images")) && (item.images[0].type === "video/mp4" || item.images[0].type === "image/jpeg" || item.images[0].type === "image/png")) {
+            return true;
+        }
+    });
+}
 
-        app.showDevToResults(devToJsonResponse);
-    } catch (error) {
+// DevTO API call
+app.getDevToData = async () => {
+    await fetch(`${app.devTOBaseUrl}/articles`)
+    .then(response => response.json())
+    .then(result => {
+        app.displayDevToData(result)
+    })
+    .catch(error => {
         console.error(`uh-oh, something went wrong with the DevTO API call: ${error}`);
-    }
+    });
 }
 
 // NYT API call to get obituaries section
-app.getNYTObituaries = async () => {
-    try {
-        const nytRequest = await fetch(`${app.nytObituariesUrl}`);
-        const nytJsonResponse = await nytRequest.json();
+app.getNYTData = async () => {
+    await fetch(`${app.nytObituariesUrl}`)
+    .then(response => response.json())
+    .then(result => {
 
-        app.showNytResults(nytJsonResponse.results);
-    } catch (error) {
+        app.displayNytData(result.results);
+    })
+    .catch(error => {
         console.error(`uh-oh, something went wrong with the NYT API call: ${error}`);
-    }
+    });
 }
 
 // Get Imgur response, and append each image and video to the page
-app.showImgurResults = (responseObjs) => {
-    responseObjs.forEach(responseObj => {
-        if (Array.isArray(responseObj.images) && !responseObj.images.animated) {
+app.displayImgurData = (apiResponseObjects) => {
+    apiResponseObjects.forEach(responseObject => {
+        if (Array.isArray(responseObject.images) && !responseObject.images[0].animated) {
             const htmlToAppend = `
-                <div>
+                <div class="ui list segment">
                     <h3 class="ui header">
-                        ${responseObj.title}
+                        ${responseObject.title}
                     </h3>
-                    <a href=${responseObj.link} target="_blank">
-                        <img class="result-item" src=${responseObj.images[0].link}>
-                    </a>
+                    <div class="item">
+                        <a href=${responseObject.link} target="_blank">
+                            <img class="result-item" src=${responseObject.images[0].link}>
+                        </a>
+                    </div>
                 </div>
             `;
 
             app.resultsList.insertAdjacentHTML("beforeend", htmlToAppend);
         }
 
-        if (responseObj.type === "video/mp4") {
+        if (Array.isArray(responseObject.images) && responseObject.images[0].type === "video/mp4") {
             const htmlToAppend = `
                 <div class="ui list segment">
                     <h3 class="ui header">
-                        ${responseObj.title}
+                        ${responseObject.title}
                     </h3>
                     <div class="item">
-                        <a href=${responseObj.link} target="_blank">
-                            <video class="result-item ui" preload="auto" autoplay="autoplay" muted="muted" loop="loop" webkit-playsinline="" poster=${responseObj.images[0].gifv}>
-                                <source type=${responseObj.images[0].type} src=${responseObj.images[0].link}>
+                        <a href=${responseObject.link} target="_blank">
+                            <video class="result-item ui" preload="auto" autoplay="autoplay" muted="muted" loop="loop" webkit-playsinline="" poster=${responseObject.images[0].gifv}>
+                                <source type=${responseObject.images[0].type} src=${responseObject.images[0].link}>
                             </video>
                         </a>
                     </div>
@@ -98,22 +105,22 @@ app.showImgurResults = (responseObjs) => {
     }) 
 };
 
-app.showDevToResults = (responseObjs) => {
-    responseObjs.forEach(responseObj => {
+app.displayDevToData = (apiResponseObjects) => {
+    apiResponseObjects.forEach(responseObject => {
         
-        if (responseObj.cover_image !== null) {
+        if (responseObject.cover_image !== null) {
             const htmlToAppend = `
                 <div class="ui list segment">
                     <h3 class="ui header">
-                        <a href=${responseObj.canonical_url} target="_blank">${responseObj.title}</a>
+                        <a href=${responseObject.canonical_url} target="_blank">${responseObject.title}</a>
                     </h3>
                     <div class="item">
-                        <img class="ui avatar image" src=${responseObj.user.profile_image_90}>
+                        <img class="ui avatar image" src=${responseObject.user.profile_image_90}>
                         <div class="content">
-                            <h4 class="header">By ${responseObj.user.name}</h4>
+                            <h4 class="header">By ${responseObject.user.name}</h4>
                         </div>
                     </div>
-                    <img class="result-item" src=${responseObj.cover_image}>
+                    <img class="result-item" src=${responseObject.cover_image}>
                 </div>
             `;
 
@@ -122,36 +129,34 @@ app.showDevToResults = (responseObjs) => {
             const htmlToAppend = `
                 <div class="ui list segment">
                     <h3 class="ui header">
-                        <a href=${responseObj.canonical_url} target="_blank">${responseObj.title}</a>
+                        <a href=${responseObject.canonical_url} target="_blank">${responseObject.title}</a>
                     </h3>
                     <div class="item">
-                        <img class="ui avatar image" src=${responseObj.user.profile_image_90}>
+                        <img class="ui avatar image" src=${responseObject.user.profile_image_90}>
                         <div class="content">
-                            <h4 class="header">By ${responseObj.user.name}</h4>
+                            <h4 class="header">By ${responseObject.user.name}</h4>
                         </div>
                     </div>
-                    <p>${responseObj.description}</p>
+                    <p>${responseObject.description}</p>
                 </div>
             `;
 
             app.resultsList.insertAdjacentHTML("beforeend", htmlToAppend);
         }
-
-        
     })
 };
 
-app.showNytResults = (responseObjs) => {
-    responseObjs.forEach(responseObj => {
+app.displayNytData = (apiResponseObjects) => {
+    apiResponseObjects.forEach(responseObject => {
         const htmlToAppend = `
             <div class="ui list segment">
                 <h3 class="ui header">
-                    <a href=${responseObj.url} target="_blank">${responseObj.title}</a>
+                    <a href=${responseObject.url} target="_blank">${responseObject.title}</a>
                 </h3>
                 <div class="item">
                     <div class="content">
-                        <img class="result-item" src=${responseObj.multimedia[1].url}>
-                        <p class="ui description">${responseObj.abstract}</h4>
+                        <img class="result-item" src=${responseObject.multimedia[1].url}>
+                        <p class="ui description">${responseObject.abstract}</h4>
                     </div>
                 </div>
             </div>
@@ -161,38 +166,37 @@ app.showNytResults = (responseObjs) => {
     });
 };
 
-app.callApi = (selector, classToAdd, classToRemove) => {
+app.callAPIOnClick = (selector, classToAdd, classToRemove) => {
     const selectedButton = document.querySelector(selector);
     
     selectedButton.addEventListener("click", () => {
         if (app.resultsList.children.length > 0) {
             app.resultsList.innerHTML = "";
         }
-
         if (selector === ".get-fun") {
             app.resultsList.classList.add(classToAdd);
             app.resultsList.classList.remove(...classToRemove);
-            app.getImgurMedia();
+            app.getImgurData();
         }
 
         if (selector === ".get-learned-fun") {
             app.resultsList.classList.add(...classToAdd);
             app.resultsList.classList.remove(classToRemove); 
-            app.getDevToArticles();  
+            app.getDevToData();  
         }
         
         if (selector === ".no-fun") {
             app.resultsList.classList.add(...classToAdd);
             app.resultsList.classList.remove(classToRemove); 
-            app.getNYTObituaries();
+            app.getNYTData();
         }
     });
 };
 
 app.init = () => {
-    app.callApi(".get-fun", "imgur", ["results-list", "ui", "grid", "container", "center", "aligned"]);
-    app.callApi(".get-learned-fun", ["results-list", "ui", "grid", "container", "center", "aligned"], "imgur");
-    app.callApi(".no-fun", ["results-list", "ui", "grid", "container", "center", "aligned"], "imgur");
+    app.callAPIOnClick(".get-fun", "imgur", ["results-list", "ui", "grid", "container", "center", "aligned"]);
+    app.callAPIOnClick(".get-learned-fun", ["results-list", "ui", "grid", "container", "center", "aligned"], "imgur");
+    app.callAPIOnClick(".no-fun", ["results-list", "ui", "grid", "container", "center", "aligned"], "imgur");
 };
 
 if (document.readyState === "complete") {
@@ -200,4 +204,3 @@ if (document.readyState === "complete") {
 } else {
 	document.addEventListener("DOMContentLoaded", app.init);
 };
-
