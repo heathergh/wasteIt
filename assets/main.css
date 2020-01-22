@@ -65,7 +65,10 @@ h2.ui.header {
 	margin-bottom: 10px;
 }
 
-.results-list .ui.segment:first-child, .results-list .ui.list:first-child {
-	margin-top: 1rem;
-	padding-top: 1em;
+.ui.segment {
+	margin-top: 0;
+}
+
+.ui.list:first-child {
+	padding-top: 14px;
 }
