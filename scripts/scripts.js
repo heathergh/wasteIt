@@ -55,7 +55,6 @@ app.getNYTData = async () => {
     await fetch(`${app.nytObituariesUrl}`)
     .then(response => response.json())
     .then(result => {
-
         app.displayNytData(result.results);
     })
     .catch(error => {
@@ -155,7 +154,7 @@ app.displayNytData = (apiResponseObjects) => {
                 </h3>
                 <div class="item">
                     <div class="content">
-                        <img class="result-item" src=${responseObject.multimedia[1].url}>
+                        <img class="result-item" src=${responseObject.multimedia[2].url}>
                         <p class="ui description">${responseObject.abstract}</h4>
                     </div>
                 </div>
@@ -173,6 +172,7 @@ app.callAPIOnClick = (selector, classToAdd, classToRemove) => {
         if (app.resultsList.children.length > 0) {
             app.resultsList.innerHTML = "";
         }
+
         if (selector === ".get-fun") {
             app.resultsList.classList.add(classToAdd);
             app.resultsList.classList.remove(...classToRemove);
@@ -198,6 +198,8 @@ app.init = () => {
     app.callAPIOnClick(".get-learned-fun", ["results-list", "ui", "grid", "container", "center", "aligned"], "imgur");
     app.callAPIOnClick(".no-fun", ["results-list", "ui", "grid", "container", "center", "aligned"], "imgur");
 };
+
+// TODO: Add infinite scrolling
 
 if (document.readyState === "complete") {
 	app.init();
