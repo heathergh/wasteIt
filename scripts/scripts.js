@@ -4,114 +4,85 @@ app.imgurUrlAndQueryParams = "https://api.imgur.com/3/gallery/hot/time/0?&realti
 
 app.imgurClientID = "3065d378db00228";
 
-app.devTOAccessToken = "4aFRPxQCcxSuTwgim3nQJaku";
-
-app.devTOBaseUrl = "https://dev.to/api";
+app.devTOUrl = "https://dev.to/api/articles";
 
 app.nytObituariesUrl = "https://api.nytimes.com/svc/topstories/v2/obituaries.json?api-key=n8rVAT6WaMe5g4stcG6o9f8iOXimh5ec";
 
-app.resultsList = document.querySelector(".results");
+app.resultsContainer = document.querySelector(".results");
 
-
-// Imgur API call
-app.getImgurData = async (url, options = {}) => {
-    await fetch(app.imgurUrlAndQueryParams, {
-        method: 'GET',
-        headers: {
-            Authorization: `Client-ID ${app.imgurClientID}`
-        }
-    })
+// global API call
+app.getData = async (url, options = {}, filterData = null, displayData) => {
+    return await fetch(url, options)
     .then(response => response.json())
     .then(result => {
-        const filteredResult = app.filterImgurData(result.data);
+        if (filterData === null) {
+            console.log(result)
+            displayData(result);
+        } else if (!(filterData === null) && Array.isArray(result.data)) {
+            const filteredResult = app.filterData(result.data);
 
-        app.displayImgurData(filteredResult);
+            displayData(filteredResult);
+        }
     })
-    .catch(error => console.error(`uh-oh, something went wrong with the Imgur API call: ${error}`));
-};
+    //TODO: show error message to user if API call fails
+    .catch(error => console.error(`uh-oh, something went wrong with the endpoint call: ${error}`));
+}
 
-app.filterImgurData = (result) => {
-    return result.filter(item => {
-        if ((item.hasOwnProperty("images")) && (item.images[0].type === "video/mp4" || item.images[0].type === "image/jpeg" || item.images[0].type === "image/png")) {
+app.filterData = (result) => {
+    return filteredData = result.filter(item => {
+        if ((item.hasOwnProperty("images")) && (item.images[0].type.includes("video") || item.images[0].type.includes("image"))) {
             return true;
         }
-    });
-}
-
-// DevTO API call
-app.getDevToData = async () => {
-    await fetch(`${app.devTOBaseUrl}/articles`)
-    .then(response => response.json())
-    .then(result => {
-        app.displayDevToData(result)
-    })
-    .catch(error => {
-        console.error(`uh-oh, something went wrong with the DevTO API call: ${error}`);
-    });
-}
-
-// NYT API call to get obituaries section
-app.getNYTData = async () => {
-    await fetch(`${app.nytObituariesUrl}`)
-    .then(response => response.json())
-    .then(result => {
-        app.displayNytData(result.results);
-    })
-    .catch(error => {
-        console.error(`uh-oh, something went wrong with the NYT API call: ${error}`);
     });
 }
 
 // Get Imgur response, and append each image and video to the page
 app.displayImgurData = (apiResponseObjects) => {
     apiResponseObjects.forEach(responseObject => {
-        if (Array.isArray(responseObject.images) && !responseObject.images[0].animated) {
+        if (!responseObject.images[0].animated) {
             const htmlToAppend = `
                 <div class="ui list segment">
                     <h3 class="ui header">
                         ${responseObject.title}
                     </h3>
                     <div class="item">
-                        <a href=${responseObject.link} target="_blank">
-                            <img class="result-item" src=${responseObject.images[0].link}>
+                        <a href=${responseObject.link}">
+                            <img class="result-item" src=${responseObject.images[0].link + "?maxwidth=520&shape=thumb&fidelity=high"} alt=${responseObject.images[0]['description'] === null ? "" : responseObject.images[0]['description']}>
                         </a>
                     </div>
                 </div>
             `;
 
-            app.resultsList.insertAdjacentHTML("beforeend", htmlToAppend);
+            app.resultsContainer.insertAdjacentHTML("beforeend", htmlToAppend);
         }
 
-        if (Array.isArray(responseObject.images) && responseObject.images[0].type === "video/mp4") {
+        if (responseObject.images[0].type === "video/mp4") {
             const htmlToAppend = `
                 <div class="ui list segment">
                     <h3 class="ui header">
                         ${responseObject.title}
                     </h3>
                     <div class="item">
-                        <a href=${responseObject.link} target="_blank">
-                            <video class="result-item ui" preload="auto" autoplay="autoplay" muted="muted" loop="loop" webkit-playsinline="" poster=${responseObject.images[0].gifv}>
-                                <source type=${responseObject.images[0].type} src=${responseObject.images[0].link}>
-                            </video>
+                        <a href=${responseObject.link}">
+                        <img class="result-item" src=${"https://i.imgur.com/" + responseObject.images[0].id + "_d.jpg?maxwidth=520&shape=thumb&fidelity=high"} alt=${responseObject.images[0]['description'] === null ? "" : responseObject.images[0]['description']}>
                         </a>
                     </div>
                 </div>
             `;
 
-            app.resultsList.insertAdjacentHTML("beforeend", htmlToAppend);
+            app.resultsContainer.insertAdjacentHTML("beforeend", htmlToAppend);
         }
-
     }) 
 };
 
 app.displayDevToData = (apiResponseObjects) => {
     apiResponseObjects.forEach(responseObject => {
         
-        if (responseObject.cover_image !== null) {
+        if (responseObject.hasOwnProperty('cover_image') && responseObject['cover_image'] !== null) {
             const htmlToAppend = `
                 <div class="ui list segment">
                     <h3 class="ui header">
-                        <a href=${responseObject.canonical_url} target="_blank">${responseObject.title}</a>
+                        <a href=${responseObject.canonical_url}">${responseObject.title}</a>
                     </h3>
                     <div class="item">
                         <img class="ui avatar image" src=${responseObject.user.profile_image_90}>
@@ -123,12 +94,12 @@ app.displayDevToData = (apiResponseObjects) => {
                 </div>
             `;
 
-            app.resultsList.insertAdjacentHTML("beforeend", htmlToAppend);
+            app.resultsContainer.insertAdjacentHTML("beforeend", htmlToAppend);
         } else {
             const htmlToAppend = `
                 <div class="ui list segment">
                     <h3 class="ui header">
-                        <a href=${responseObject.canonical_url} target="_blank">${responseObject.title}</a>
+                        <a href=${responseObject.canonical_url}">${responseObject.title}</a>
                     </h3>
                     <div class="item">
                         <img class="ui avatar image" src=${responseObject.user.profile_image_90}>
@@ -140,17 +111,18 @@ app.displayDevToData = (apiResponseObjects) => {
                 </div>
             `;
 
-            app.resultsList.insertAdjacentHTML("beforeend", htmlToAppend);
+            app.resultsContainer.insertAdjacentHTML("beforeend", htmlToAppend);
         }
     })
 };
 
 app.displayNytData = (apiResponseObjects) => {
-    apiResponseObjects.forEach(responseObject => {
+    const responseObjects = apiResponseObjects.results;
+    responseObjects.forEach(responseObject => {
         const htmlToAppend = `
             <div class="ui list segment">
                 <h3 class="ui header">
-                    <a href=${responseObject.url} target="_blank">${responseObject.title}</a>
+                    <a href=${responseObject.url}">${responseObject.title}</a>
                 </h3>
                 <div class="item">
                     <div class="content">
@@ -161,7 +133,7 @@ app.displayNytData = (apiResponseObjects) => {
             </div>
         `;
 
-        app.resultsList.insertAdjacentHTML("beforeend", htmlToAppend);
+        app.resultsContainer.insertAdjacentHTML("beforeend", htmlToAppend);
     });
 };
 
@@ -169,29 +141,33 @@ app.callAPIOnClick = (selector, classToAdd, classToRemove) => {
     const selectedButton = document.querySelector(selector);
     
     selectedButton.addEventListener("click", () => {
-        if (app.resultsList.children.length > 0) {
-            app.resultsList.innerHTML = "";
+        if (app.resultsContainer.children.length > 0) {
+            app.resultsContainer.innerHTML = "";
         }
 
         if (selector === ".get-fun") {
-            app.resultsList.classList.add(classToAdd);
-            app.resultsList.classList.remove(...classToRemove);
-            app.getImgurData();
+            app.resultsContainer.classList.add(classToAdd);
+            app.resultsContainer.classList.remove(...classToRemove);
+            app.getData(app.imgurUrlAndQueryParams, {headers: {Authorization: `Client-ID ${app.imgurClientID}`}}, app.filterData, app.displayImgurData);
         }
 
         if (selector === ".get-learned-fun") {
-            app.resultsList.classList.add(...classToAdd);
-            app.resultsList.classList.remove(classToRemove); 
-            app.getDevToData();
+            app.resultsContainer.classList.add(...classToAdd);
+            app.resultsContainer.classList.remove(classToRemove); 
+            app.getData(app.devTOUrl, {}, null, app.displayDevToData);
         }
         
         if (selector === ".no-fun") {
-            app.resultsList.classList.add(...classToAdd);
-            app.resultsList.classList.remove(classToRemove); 
-            app.getNYTData();
+            app.resultsContainer.classList.add(...classToAdd);
+            app.resultsContainer.classList.remove(classToRemove); 
+            app.getData(app.nytObituariesUrl, {}, null, app.displayNytData);
         }
     });
 };
+
+// app.infiniteScroll = () => {
+//     // TODO: Add infinite scrolling functionality
+// }
 
 app.init = () => {
     app.callAPIOnClick(".get-fun", "imgur", ["results-list", "ui", "grid", "container", "center", "aligned"]);
@@ -199,7 +175,6 @@ app.init = () => {
     app.callAPIOnClick(".no-fun", ["results-list", "ui", "grid", "container", "center", "aligned"], "imgur");
 };
 
-// TODO: Add infinite scrolling
 
 if (document.readyState === "complete") {
 	app.init();
