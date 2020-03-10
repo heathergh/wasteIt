@@ -16,7 +16,6 @@ app.getData = async (url, options = {}, filterData = null, displayData) => {
     .then(response => response.json())
     .then(result => {
         if (filterData === null) {
-            console.log(result)
             displayData(result);
         } else if (!(filterData === null) && Array.isArray(result.data)) {
             const filteredResult = app.filterData(result.data);
@@ -25,53 +24,36 @@ app.getData = async (url, options = {}, filterData = null, displayData) => {
         }
     })
     //TODO: show error message to user if API call fails
-    .catch(error => console.error(`uh-oh, something went wrong with the endpoint call: ${error}`));
+    .catch( error =>
+        app.resultsContainer.insertAdjacentHTML("beforeend", "<p class=\"error\">Error: We couldn't get the content you requested. Please try again later.</p>")
+    );
 }
 
 app.filterData = (result) => {
     return filteredData = result.filter(item => {
-        if ((item.hasOwnProperty("images")) && (item.images[0].type.includes("video") || item.images[0].type.includes("image"))) {
+        if ((item.hasOwnProperty("images")) && (item.images[0].type.includes("video") || item.images[0].type.includes("image")) && !(item.images[0].animated)) {
             return true;
         }
     });
 }
 
-// Get Imgur response, and append each image and video to the page
+// Get Imgur response, and append each image to the page
 app.displayImgurData = (apiResponseObjects) => {
     apiResponseObjects.forEach(responseObject => {
-        if (!responseObject.images[0].animated) {
-            const htmlToAppend = `
+        const htmlToAppend = `
                 <div class="ui list segment">
                     <h3 class="ui header">
                         ${responseObject.title}
                     </h3>
                     <div class="item">
-                        <a href=${responseObject.link}">
-                            <img class="result-item" src=${responseObject.images[0].link + "?maxwidth=520&shape=thumb&fidelity=high"} alt=${responseObject.images[0]['description'] === null ? "" : responseObject.images[0]['description']}>
+                        <a href=${responseObject.link}>
+                        <img class="result-item" src=${"https://i.imgur.com/" + responseObject.images[0].id + "_d.jpg?maxwidth=300&shape=thumb&fidelity=high"} alt=${(responseObject.images[0]['description'] === null) ? "" : "\"" + responseObject.images[0]['description'] + "\""}>
                         </a>
                     </div>
                 </div>
             `;
 
             app.resultsContainer.insertAdjacentHTML("beforeend", htmlToAppend);
-        }
-
-        if (responseObject.images[0].type === "video/mp4") {
-            const htmlToAppend = `
-                <div class="ui list segment">
-                    <h3 class="ui header">
-                        ${responseObject.title}
-                    </h3>
-                    <div class="item">
-                        <a href=${responseObject.link}">
-                        <img class="result-item" src=${"https://i.imgur.com/" + responseObject.images[0].id + "_d.jpg?maxwidth=520&shape=thumb&fidelity=high"} alt=${responseObject.images[0]['description'] === null ? "" : responseObject.images[0]['description']}>
-                        </a>
-                    </div>
-                </div>
-            `;
-
-            app.resultsContainer.insertAdjacentHTML("beforeend", htmlToAppend);
-        }
     }) 
 };
 
