@@ -32,8 +32,8 @@ h2.ui.header {
 	width: 75%;
 }
 
-.imgur img,
-.imgur video {
+.imgur img {
+	height: 300px;
 	object-fit: contain;
 	width: 300px;
 }
@@ -48,8 +48,7 @@ h2.ui.header {
 
 .results-list h3,
 .results-list p,
-.results-list img,
-.results-list video {
+.results-list img {
 	width: 250px;
 }
 
@@ -71,4 +70,13 @@ h2.ui.header {
 
 .ui.list:first-child {
 	padding-top: 14px;
+}
+
+.error {
+	background: #FFF6F6;
+	box-shadow: rgba(155, 155, 155, 0.15);
+	color: #9F3A38;
+	border: 1px solid #9F3A38;
+	border-radius: 5px;
+	padding: 15px 25px;
 }
