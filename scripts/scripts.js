@@ -11,8 +11,8 @@ app.nytObituariesUrl = "https://api.nytimes.com/svc/topstories/v2/obituaries.jso
 app.resultsContainer = document.querySelector(".results");
 
 // global API call
-app.getData = async (url, options = {}, filterData = null, displayData) => {
-    return await fetch(url, options)
+app.getData = (url, options = {}, filterData = null, displayData) => {
+    return fetch(url, options)
     .then(response => response.json())
     .then(result => {
         if (filterData === null) {
