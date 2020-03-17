@@ -59,12 +59,11 @@ app.displayImgurData = (apiResponseObjects) => {
 
 app.displayDevToData = (apiResponseObjects) => {
     apiResponseObjects.forEach(responseObject => {
-        
         if (responseObject.hasOwnProperty('cover_image') && responseObject['cover_image'] !== null) {
             const htmlToAppend = `
                 <div class="ui list segment">
                     <h3 class="ui header">
-                        <a href=${responseObject.canonical_url}">${responseObject.title}</a>
+                        <a href=${responseObject.canonical_url}>${responseObject.title}</a>
                     </h3>
                     <div class="item">
                         <img class="ui avatar image" src=${responseObject.user.profile_image_90}>
@@ -81,7 +80,7 @@ app.displayDevToData = (apiResponseObjects) => {
             const htmlToAppend = `
                 <div class="ui list segment">
                     <h3 class="ui header">
-                        <a href=${responseObject.canonical_url}">${responseObject.title}</a>
+                        <a href=${responseObject.canonical_url}>${responseObject.title}</a>
                     </h3>
                     <div class="item">
                         <img class="ui avatar image" src=${responseObject.user.profile_image_90}>
@@ -104,7 +103,7 @@ app.displayNytData = (apiResponseObjects) => {
         const htmlToAppend = `
             <div class="ui list segment">
                 <h3 class="ui header">
-                    <a href=${responseObject.url}">${responseObject.title}</a>
+                    <a href=${responseObject.url}>${responseObject.title}</a>
                 </h3>
                 <div class="item">
                     <div class="content">
