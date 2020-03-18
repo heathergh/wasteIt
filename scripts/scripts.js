@@ -29,7 +29,7 @@ app.getData = (url, options = {}, filterData = null, displayData) => {
     );
 }
 
-app.filterData = (result) => {
+app.filterData = result => {
     return filteredData = result.filter(item => {
         if ((item.hasOwnProperty("images")) && (item.images[0].type.includes("video") || item.images[0].type.includes("image")) && !(item.images[0].animated)) {
             return true;
@@ -38,8 +38,8 @@ app.filterData = (result) => {
 }
 
 // Get Imgur response, and append each image to the page
-app.displayImgurData = (apiResponseObjects) => {
-    apiResponseObjects.forEach(responseObject => {
+app.displayImgurData = apiResponse => {
+    apiResponse.forEach(responseObject => {
         const htmlToAppend = `
                 <div class="ui list segment">
                     <h3 class="ui header">
@@ -57,8 +57,8 @@ app.displayImgurData = (apiResponseObjects) => {
     }) 
 };
 
-app.displayDevToData = (apiResponseObjects) => {
-    apiResponseObjects.forEach(responseObject => {
+app.displayDevToData = apiResponse => {
+    apiResponse.forEach(responseObject => {
         if (responseObject.hasOwnProperty('cover_image') && responseObject['cover_image'] !== null) {
             const htmlToAppend = `
                 <div class="ui list segment">
@@ -97,8 +97,8 @@ app.displayDevToData = (apiResponseObjects) => {
     })
 };
 
-app.displayNytData = (apiResponseObjects) => {
-    const responseObjects = apiResponseObjects.results;
+app.displayNytData = apiResponse => {
+    const responseObjects = apiResponse.results;
     responseObjects.forEach(responseObject => {
         const htmlToAppend = `
             <div class="ui list segment">
